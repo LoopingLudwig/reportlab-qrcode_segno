@@ -1,10 +1,10 @@
-import qrcode
+import segno
 from reportlab.lib.units import mm
 from reportlab.platypus import Flowable
 
 
 class QRCodeImage(Flowable):
-    def __init__(self, data=None, size=25 * mm, fill_color='black',
+    def __init__(self, data, size=25 * mm, fill_color='black',
                  back_color='white', border=4, **kwargs):
         Flowable.__init__(self)
         self.x = 0
@@ -15,20 +15,14 @@ class QRCodeImage(Flowable):
         self.border = border
         self.fill_color = fill_color
         self.back_color = back_color
-        kwargs['box_size'] = 1
-        kwargs['border'] = 0
-        self._qr = qrcode.QRCode(**kwargs)
-        if data is not None:
-            self._qr.add_data(data)
-
-    def add_data(self, data, optimize=20):
-        self._qr.add_data(data, optimize)
-
-    def clear(self):
-        self._qr.clear()
+        self.data = data
+        self.qr_kwargs = kwargs
 
     def draw(self):
-        matrix = self._qr.get_matrix()
+
+        qr = segno.make(self.data, **self.qr_kwargs)
+        matrix = qr.matrix
+
         active_positions = []
         for y, row in enumerate(matrix):
             for x, is_active in enumerate(row):
